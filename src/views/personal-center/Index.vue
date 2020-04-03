@@ -167,7 +167,7 @@
 
         // 跳转个人资料页面
         private goProfile() {
-            this.$router.push({path: '/personal/introduction'});
+            this.$router.push({path: '/introduction'});
         }
 
         private goLogin() {
@@ -264,6 +264,7 @@
             text-align: left;
             color: #fff;
             font-size: 14px;
+            line-height: 1.8;
         }
 
         &-nickname {

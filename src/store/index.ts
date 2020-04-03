@@ -46,8 +46,8 @@ export default new Vuex.Store({
     actions: {
         updateUserInfo(context, val) {
             // 更新用户信息
-            Api.updateUserInfo(val).then((res: any)=>{
-                context.commit("UPDATE_USER",res.data);
+            Api.updateUserInfo(val).then((res: any) => {
+                context.commit("UPDATE_USER", JSON.stringify(res));
             })
         }
     },

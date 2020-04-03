@@ -15,7 +15,7 @@
                         title="手机"
                         is-link
                         :value="ifEmpty(member.phone,'未绑定')"
-                        @click="bindForm('phone')"></van-cell>
+                        @click="setField('phone','请填写手机号')"></van-cell>
                 <van-cell title="邮箱" is-link :value="ifEmpty(member.email,'未填写')"
                           @click="setField('email','请填写邮箱')"></van-cell>
             </van-cell-group>
@@ -23,8 +23,8 @@
                 <van-cell
                         title="姓名"
                         is-link
-                        :value="ifEmpty(member.realname)"
-                        @click="setField('realname','请填写真实姓名')"></van-cell>
+                        :value="ifEmpty(member.realName)"
+                        @click="setField('realName','请填写真实姓名')"></van-cell>
                 <van-cell title="性别" is-link @click="pickGender" :value="fmtGender(member.gender)"></van-cell>
                 <van-cell title="生日" is-link @click="pickDate" :value="fmtBirthday(member.birth)"></van-cell>
                 <van-cell title="地区" is-link @click="pickAddress" :value="areas"></van-cell>
@@ -47,7 +47,7 @@
             <van-datetime-picker
                     v-model="birthDay"
                     @confirm="setBirth"
-                    @cancel="initBirthDay"
+                    @cancel="cancelBirthDay"
                     type="date"
                     :min-date="minDate"
                     :max-date="maxDate"></van-datetime-picker>
@@ -62,7 +62,6 @@
         <van-popup v-model="showAddressPicker" position="bottom">
             <van-area
                     :area-list="areaList"
-                    value="110101"
                     :columns-placeholder="addressColumns"
                     @cancel="areaCancel"
                     @confirm="setAddress"
@@ -93,7 +92,6 @@
         private birthDay = new Date();
         private showGenderPicker = false;
         private genders = ['保密', '男', '女'];
-        private showBindForm = false;
         private showBindType = '';
         private step = 0;
         private smsCode = '';
@@ -150,16 +148,15 @@
             this.$router.back();
         }
 
+        private changeAvatar() {
+
+        }
+
         private ifEmpty(val: any, dft = "未填写") {
             return val ? val : dft;
         }
 
-        private initBirthDay() {
-            // @ts-ignore
-            // if (store.state.userInfo.birth > 0) {
-            //     // @ts-ignore
-            //     this.birthDay = new Date(store.state.userinfo.birth * 1000);
-            // }
+        private cancelBirthDay() {
             this.showDatePicker = false;
         }
 
@@ -173,24 +170,11 @@
         }
 
         private fmtBirthday(timestamp: any) {
-            if (!timestamp || timestamp < 1) return "未填写";
-            let date = new Date(timestamp * 1000);
-
-            return (
-                date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate()
-            );
-        }
-
-        private bindForm(type: any) {
-            this.showBindForm = true;
-            this.showBindType = type;
-            this.step = 0;
-            // if (!this.member.phone_bind) {
-            //     this.phone = this.member.phone;
-            // }
-            // if (!this.member.email_bind) {
-            //     this.email = this.member.email;
-            // }
+            return timestamp ? timestamp : "未填写";
+            // let date = new Date(timestamp * 1000);
+            // return (
+            //     date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate()
+            // );
         }
 
         // private sendSMS() {
@@ -203,9 +187,18 @@
         // }
 
         private pickDate() {
+            this.showDatePicker = true;
+            // @ts-ignore
+            if (this.$store.state.userInfo.birth) {
+                // @ts-ignore
+                this.birthDay = new Date(store.state.userinfo.birth);
+            }
         }
 
-        private setBirth() {
+        private setBirth(val: any) {
+            const birth = new Date(val);
+            this.updateInfo({birth: this.$Utils.dateFormat('Y-m-d',birth)});
+            this.cancelBirthDay();
         }
 
         private pickGender() {
@@ -214,7 +207,7 @@
 
         private setGender(value: any, index: any) {
             this.showGenderPicker = false;
-            this.updateField({gender: index});
+            this.updateInfo({gender: index});
         }
 
         private loadAddress() {
@@ -246,7 +239,7 @@
         }
 
         private setAddress(values: any) {
-            this.updateField({
+            this.updateInfo({
                 province: values[0].name,
                 city: values[1].name,
                 county: values[2].name
@@ -263,13 +256,20 @@
             this.$refs.fieldInput && this.$refs.fieldInput.focus();
         }
 
-        private updateField(params: any) {
+        private updateField() {
+            this.updateInfo({
+                [this.fieldName]: this.fieldValue
+            });
+            this.promptShow = false;
+        }
+
+        private updateInfo(params: any) {
             const temp = {
                 ...params,
-                id:this.member.id
+                id: this.member.id,
+                loginName: this.member.loginName
             };
-            this.$store.dispatch("updateUserInfo", params);
-            this.promptShow = false;
+            this.$store.dispatch("updateUserInfo", temp);
         }
     }
 </script>
@@ -278,7 +278,7 @@
     .page-profile {
         .prompt-input {
             border: 1px #ddd solid;
-            margin: .2rem;
+            margin: auto;
             width: calc(100% - 40px);
         }
 
