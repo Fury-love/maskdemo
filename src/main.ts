@@ -8,6 +8,7 @@ import message from '@/utils/Message';
 import utils from '@/utils/utils';
 import {Lazyload} from 'vant';
 import 'vant/lib/index.css';
+import '@/assets/style/iconfont/iconfont.css';
 import GLOBAL from '@/assets/global/global_variable';
 
 Vue.use(Lazyload);
